@@ -9,8 +9,8 @@
 #define PIN4 RPI_GPIO_P1_15
 #define PIN5 RPI_GPIO_P1_16
 #define PIN6 RPI_GPIO_P1_18
-#define PIN7 RPI_GPIO_P1_8
-#define PIN8 RPI_GPIO_P1_7
+#define PIN7 RPI_GPIO_P1_08
+#define PIN8 RPI_GPIO_P1_07
 
 int main(int argc, char **argv)
 {
