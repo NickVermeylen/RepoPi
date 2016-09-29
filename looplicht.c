@@ -1,6 +1,6 @@
 #include <bcm2835.h>
 #include <stdio.h>
-#include <stdint>
+#include <stdint.h>
 
 #define AANTAL 8
 #define PIN1 RPI_GPIO_P1_11
