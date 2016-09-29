@@ -30,13 +30,13 @@ int main(int argc, char **argv)
 	while(1)
 	{
 		bcm2835_gpio_write(leds[0], HIGH);
+		bcm2835_delay(200);
 		int i = 0;
 		for(i = 1; i < 8; i++)
 		{
 		bcm2835_gpio_write(leds[i-1], LOW);
-		bcm2835_delay(500);
 		bcm2835_gpio_write(leds[i], HIGH);
-		bcm2835_delay(500);
+		bcm2835_delay(200);
 		}
 		bcm2835_gpio_write(leds[7], LOW);
 	}
