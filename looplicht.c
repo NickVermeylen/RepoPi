@@ -21,12 +21,17 @@ int main(int argc, char **argv)
 
 	uint8_t leds[AANTAL] = {PIN1,PIN2,PIN3,PIN4,PIN5,PIN6,PIN7,PIN8};
 
-	bcm2835_gpio_fsel(PIN, BCM2835_GPIO_FSEL_OUTP);
+	int j;
+	for(j=0;j<8;j++)
+	{
+		bcm2835_gpio_fsel(leds[j], BCM2835_GPIO_FSEL_OUTP);
+	}
 
 	while(1)
 	{
 		bcm2835_gpio_write(leds[0], HIGH);
-		for(int i = 1; i < 8; i++)
+		int i = 0;
+		for(i = 1; i < 8; i++)
 		{
 		bcm2835_gpio_write(leds[i-1], LOW);
 		bcm2835_delay(500);
