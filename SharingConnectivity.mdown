@@ -1,0 +1,10 @@
+===Sharing network connection===
+==== RPI /etc/dhcpcd.conf ====
+Set RPI static ip eth0 to 192.168.137.10 --> 192.168.137... because windows forces this ip when bridging connections
+This will be the ip used to connect through ssh
+set RPI static ip wlan to 192.168.137.200
+==== Windows network adaptors ====
+set LAN adaptor to 192.168.137.1
+set wireless connection to shared with LAN
+==== RPI PING ====
+fix "not permitted operation" with sudo chmod u+s /bin/ping
