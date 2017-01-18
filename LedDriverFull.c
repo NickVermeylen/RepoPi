@@ -25,6 +25,7 @@
 #define LED 17
 
 static void *mapmem(const char *msg, size_t size, int fd, off_t off);
+void getPeriBase(uint32_t **peri_base, uint32_t *peri_size);
 
 //Function for nice shutdown on ctrl+c
 volatile uint8_t quit = 1;
@@ -42,6 +43,12 @@ int main(int argc, char **argv)
 	uint32_t * vmem;
 	uint32_t * gpio;
 	volatile uint32_t * gpioPtr;		//volatile zodat programma steeds verplicht w om te kijken of var veranderd is ipv const te maken
+	
+	//Perpheral base pointer & size
+	uint32_t *peri_base;
+	uint32_t peri_size;
+	
+
 	if(geteuid() == 0)
 	{
 		if((memory = open("/dev/mem", O_RDWR | O_SYNC)) < 0)			// /dev/mem openen en int terug geven vanwaar die file staat
@@ -50,8 +57,15 @@ int main(int argc, char **argv)
 			exit(1);
 		}
 
-		vmem = mapmem("gpio",PERI_SIZE, memory, (uint32_t)PERI_BASE_ADDRESS);		// /dev/mem geheugenplaatsten mappen in userspace
-		if(vmem == MAP_FAILED) exit(1);
+		//Peripheral base adress gaan lezen
+		getPeriBase(&peri_base,&peri_size);
+
+		vmem = mapmem("gpio",peri_size, memory, (uint32_t) peri_base);		// /dev/mem geheugenplaatsten mappen in userspace
+		if(vmem == MAP_FAILED) 
+		{
+			fprintf(stderr, "MapMem: Something went wrong : %s\n",strerror(errno));
+			exit(1);
+		}
 
 		//pointer naar peripheral blok
 		gpio = vmem + GPIO_BASE_ADDRESS/4;
@@ -78,14 +92,14 @@ int main(int argc, char **argv)
 			//LED UIT
 			gpioPtr = gpio + GPCLR0/4; 		//springen naar het clear register
 			*gpioPtr = (1 << 17);
-			delay(400);
+			delay(200);
 		}
 	}
 	else
 	{
 		printf("PLEASE USE MOTHERF*CKING SUDO!\n");
 	}
-	munmap((void**) &vmem, PERI_SIZE);
+	munmap((void**) &vmem, peri_size);
 	close(memory);
 
 	bcm2835_close();
@@ -101,4 +115,18 @@ static void *mapmem(const char *msg, size_t size, int fd, off_t off)
 	}
 	return map;
 }
-
+void getPeriBase(uint32_t **peri_base, uint32_t *peri_size)
+{
+	FILE *fp;
+	if ((fp = fopen("/proc/device-tree/soc/ranges" , "rb")))
+    {
+        unsigned char buf[4];
+	fseek(fp, 4, SEEK_SET);
+	if (fread(buf, 1, sizeof(buf), fp) == sizeof(buf))
+	  	*peri_base = (uint32_t *)(buf[0] << 24 | buf[1] << 16 | buf[2] << 8 | buf[3] << 0);
+	fseek(fp, 8, SEEK_SET);
+	if (fread(buf, 1, sizeof(buf), fp) == sizeof(buf))
+	  	*peri_size = (uint32_t)(buf[0] << 24 | buf[1] << 16 | buf[2] << 8 | buf[3] << 0);
+	fclose(fp);
+    }
+}

@@ -1,3 +1,7 @@
+//* - make de file
+//* - sudo insmod procdriver.
+//* - echo "1" / "0" | sudo tee /proc/procdriver
+
 #include <linux/module.h>
 #include <linux/proc_fs.h>
 #include <linux/seq_file.h>
@@ -24,10 +28,10 @@ static const uint8_t gpselReg[8] = {1,1,2,2,2,2,1,0};
 static const uint8_t gpselBit[8] = {21,24,21,6,9,12,12,12};
 static const uint8_t gpioPin[8] = {17,18,27,22,23,24,14,4};
 
-static char terminal[9] = {"00000000"};
+//static char terminal[9] = {"00000000"};
 
 static int led_proc_show(struct seq_file *m, void *v) {
-  seq_printf(m, "Hello procdriver!\nGive the 8bits plz: %s\n", terminal);
+  seq_printf(m, "Hello procdriver!\n");
   return 0;
 }
 static int led_proc_open(struct inode *inode, struct  file *file) {
@@ -39,14 +43,14 @@ ssize_t led_proc_write(struct file * file, const char __user * user, size_t size
 {
 	if(size >= 8)
 	{
-		char kernel[50];
+		char kernel[10];
 		uint8_t i;
 
 		copy_from_user(kernel, user, size);
 
 		for(i = 0; i < 8; i++)
 		{
-			terminal[i] = kernel[i];
+			//terminal[i] = kernel[i];
 			if(kernel[i] == '1')
 			{
 				gpioPtr = gpio + GPSET0/4;
@@ -58,11 +62,11 @@ ssize_t led_proc_write(struct file * file, const char __user * user, size_t size
 				*gpioPtr = 1 << gpioPin[i];
 			}
 		}
-		terminal[i] = '/0';
+		//terminal[i] = '\0';
 	}
 	else
 	{
-		printk("There were no 8bits found as input!");
+		printk("The input was to big or there was none @ all...");
 	}
 
 	return size;
@@ -90,7 +94,7 @@ void initIO(void)
 
 	if(of_property_read_u32_array(socNode, "ranges", data, 3) == 0)
 	{
-		if(periBase = ioremap(data[1], data[2]) != NULL)
+		if((periBase = ioremap(data[1], data[2])) != NULL)
 		{
 			gpio = periBase + GPIO_BASE_ADDRESS/4; 		// /4 pointer aritmatic
 			initLed();
