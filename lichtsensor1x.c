@@ -28,7 +28,7 @@ int main(int argc, char **argv)
 
 	//bcm2835_i2c_setSlaveAddress(0x29); // write slave addres 
 
-	//sensor init
+	//sensor read
 
 
 	bcm2835_i2c_setSlaveAddress(0x29);
